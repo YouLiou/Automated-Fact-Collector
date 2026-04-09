@@ -5,6 +5,7 @@ import time
 
 # 設定存檔的檔名
 DB_FILE = "fact_archive.json"
+MAX_FACTS = 100  # 設定保留最大數量
 
 def fetch_fact():
     url = "https://uselessfacts.jsph.pl/api/v2/facts/random"
@@ -17,7 +18,6 @@ def fetch_fact():
     return None
 
 def save_to_archive(new_fact):
-    # 1. 讀取現有的資料
     if os.path.exists(DB_FILE):
         with open(DB_FILE, "r", encoding="utf-8") as f:
             try:
@@ -27,34 +27,40 @@ def save_to_archive(new_fact):
     else:
         archive = []
 
-    # 2. 去重邏輯：檢查 ID 是否重複
     is_duplicate = any(item['id'] == new_fact['id'] for item in archive)
 
     if is_duplicate:
-        print(f"跳過！這條知識 (ID: {new_fact['id']}) 已經存過了。")
+        print(f"[-] 跳過！(ID: {new_fact['id']}) 已經存過了。")
     else:
-        # 3. 加入新資料並存回檔案
         archive.append(new_fact)
+        
+        # 數量限制邏輯
+        if len(archive) > MAX_FACTS:
+            archive.pop(0)
+            print(f"[!] 達上限 {MAX_FACTS}，已移除最舊的一筆。")
+        
         with open(DB_FILE, "w", encoding="utf-8") as f:
             json.dump(archive, f, indent=4, ensure_ascii=False)
-        print(f"成功存入新知識！目前資料庫共有 {len(archive)} 筆資料。")
+        
+        # --- 修改這裡：把內容印出來 ---
+        print(f"[+] 成功存入！目前總數: {len(archive)}")
+        print(f"    內容: {new_fact['text']}") # 這一行會讓你看到內容
 
-# --- 這是整個程式的唯一入口 ---
 if __name__ == "__main__":
+    # 如果你想「重新開始」，取消下面這一行的註解 (刪掉 #)
+    # if os.path.exists(DB_FILE): os.remove(DB_FILE); print("--- 已清空舊資料庫，重新開始 ---")
+
     print("--- 🌍 自動冷知識收集器啟動 ---")
-    print("按下 Ctrl + C 可以安全停止程式\n")
+    print(f"設定上限為 {MAX_FACTS} 筆，按下 Ctrl + C 停止\n")
     
     try:
         while True:
-            print(f"[{time.strftime('%H:%M:%S')}] 正在嘗試抓取...")
             fact = fetch_fact()
-            
             if fact:
                 save_to_archive(fact)
             
-            # 設定間隔時間（10 秒）
-            print("等待 10 秒後進行下一次抓取...\n")
+            print(f"\n[{time.strftime('%H:%M:%S')}] 等待 10 秒後抓取下一個...\n")
             time.sleep(10) 
             
     except KeyboardInterrupt:
-        print("\n[!] 程式已手動停止。")
+        print("\n[!] 程式已停止。")
