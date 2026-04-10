@@ -1,4 +1,4 @@
-# 🌍 Automated Fact Collector
+#  Automated Fact Collector
 
 This is a digital tool designed to automatically discover, collect, and organize a unique database of interesting facts using Python. This project demonstrates the core principles of automation, data management, and interaction with online APIs.
 
@@ -8,7 +8,7 @@ This is a digital tool designed to automatically discover, collect, and organize
 - **Deduplication Logic**: Implements a check to ensure only unique facts are added, preventing duplicates in the database.
 - **Structured Data**: Manages information using the JSON format for easy exchange and readability.
 
-## 🛠 Technologies Used
+## Technologies Used
 - **Language**: Python 3.14
 - **Libraries**: `requests` (API interaction), `json` (data storage), `time` (automation), `os` (file handling)
 - **Data Source**: [Useless Facts API](https://uselessfacts.jsph.pl/)
